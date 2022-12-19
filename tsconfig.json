@@ -9,14 +9,14 @@
     "allowJs": true,
     "declaration": true,
     "paths": {
-      "@shared/*": [
-        "@shared/*"
+      "@root/*": [
+        "./*"
       ],
-      "@shared": [
-        "@shared/index.ts"
+      "@root": [
+        "./index.ts"
       ]
     },
-    "outDir": "./dist",
+    "outDir": "./dist/esm",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,

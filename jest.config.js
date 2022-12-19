@@ -5,12 +5,13 @@ const { compilerOptions } = require('./tsconfig.json');
 module.exports = {
   preset: 'ts-jest',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
-    prefix: '<rootDir>/',
+    prefix: '<rootDir>',
   }),
   testEnvironment: 'node',
   transform: {
     '^.+\\.ts?$': ['@swc/jest'],
   },
+  rootDir: './src',
   clearMocks: true,
   globals: {
     'ts-jest': {
