@@ -4,7 +4,7 @@ import {
   EntityValidationError,
   UniqueEntityId,
 } from '@fvsystem/fvshop-shared-entities';
-import { TaskValidatorFactory } from '../validator';
+import { SameResponsibleChangeError, TaskValidatorFactory } from '@root';
 
 export type TaskStatus = 'pending' | 'completed' | 'canceled' | 'overdue';
 
@@ -69,6 +69,29 @@ export class TaskEntity extends Entity<TaskProps> {
     return this.props.timeInDays;
   }
 
+  complete(): void {
+    this.props.completed = true;
+    this.props.endDate = new Date();
+    const {
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    } = this.props;
+    TaskEntity.validate({
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    });
+  }
+
   get completed(): boolean {
     return this.props.completed;
   }
@@ -81,10 +104,83 @@ export class TaskEntity extends Entity<TaskProps> {
     return this.props.responsible;
   }
 
+  get endDate(): Date | null {
+    return this.props.endDate || null;
+  }
+
   get deadline(): Date {
     return new Date(
       this.startDate.getTime() + this.timeInDays * 24 * 60 * 60 * 1000
     );
+  }
+
+  cancel(): void {
+    this.props.canceled = true;
+    const {
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    } = this.props;
+    TaskEntity.validate({
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    });
+  }
+
+  postpone(days: number): void {
+    this.props.timeInDays += days;
+    const {
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    } = this.props;
+    TaskEntity.validate({
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    });
+  }
+
+  changeResponsible(responsible: UserEntity): void {
+    if (this.responsible.id === responsible.id) {
+      throw new SameResponsibleChangeError();
+    }
+    this.props.responsible = responsible;
+    const {
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    } = this.props;
+    TaskEntity.validate({
+      description,
+      name,
+      timeInDays,
+      startDate,
+      completed,
+      endDate,
+      canceled,
+    });
   }
 
   static validate(props: Omit<TaskProps, 'responsible'>) {
