@@ -6,6 +6,8 @@ import {
 } from '@fvsystem/fvshop-shared-entities';
 import { TaskValidatorFactory } from '../validator';
 
+export type TaskStatus = 'pending' | 'completed' | 'canceled' | 'overdue';
+
 export interface TaskProps {
   description: string;
   name: string;
@@ -14,6 +16,7 @@ export interface TaskProps {
   responsible: UserEntity;
   completed: boolean;
   endDate?: Date;
+  canceled?: boolean;
 }
 
 export class TaskEntity extends Entity<TaskProps> {
@@ -34,10 +37,28 @@ export class TaskEntity extends Entity<TaskProps> {
     this.props.responsible = props.responsible;
     this.props.completed = props.completed;
     this.props.endDate = props.endDate;
+    this.props.canceled = props.canceled || false;
   }
 
   get description(): string {
     return this.props.description;
+  }
+
+  get canceled(): boolean {
+    return this.props.canceled || false;
+  }
+
+  get status(): TaskStatus {
+    if (this.canceled) {
+      return 'canceled';
+    }
+    if (this.completed) {
+      return 'completed';
+    }
+    if (this.deadline < new Date()) {
+      return 'overdue';
+    }
+    return 'pending';
   }
 
   get name(): string {

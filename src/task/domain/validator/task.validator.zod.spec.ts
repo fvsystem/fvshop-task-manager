@@ -46,4 +46,59 @@ describe('TaskValidator', () => {
       endDate: ['End date is required when task is completed'],
     });
   });
+
+  it('should not validate a task if completed is not sent in a task with end date', () => {
+    const taskValidator = new TaskValidatorZod();
+    const startDate = new Date(2022, 1, 1);
+    const endDate = new Date(2023, 1, 1);
+    const result = taskValidator.validate({
+      description: 'description',
+      name: 'name',
+      timeInDays: 1,
+      startDate,
+      endDate,
+      completed: false,
+    });
+    expect(result).toBeFalsy();
+    expect(taskValidator.errors).toStrictEqual({
+      completed: ['Completed must be true when end date is sent'],
+    });
+  });
+
+  it('should not validate when end Date is bigger than start date', () => {
+    const taskValidator = new TaskValidatorZod();
+    const startDate = new Date(2022, 1, 1);
+    const endDate = new Date(2021, 1, 1);
+    const result = taskValidator.validate({
+      description: 'description',
+      name: 'name',
+      timeInDays: 1,
+      startDate,
+      endDate,
+      completed: true,
+    });
+    expect(result).toBeFalsy();
+    expect(taskValidator.errors).toStrictEqual({
+      endDate: ['end date must be bigger than start date'],
+    });
+  });
+  it('should not validate when task is cancelled and has endDate or completed', () => {
+    const taskValidator = new TaskValidatorZod();
+    const startDate = new Date(2022, 1, 1);
+    const endDate = new Date(2023, 1, 1);
+    const result = taskValidator.validate({
+      description: 'description',
+      name: 'name',
+      timeInDays: 1,
+      startDate,
+      endDate,
+      completed: true,
+      canceled: true,
+    });
+    expect(result).toBeFalsy();
+    expect(taskValidator.errors).toStrictEqual({
+      endDate: ['a task cannot have an end date if it is canceled'],
+      completed: ['a task cannot be completed if it is canceled'],
+    });
+  });
 });
